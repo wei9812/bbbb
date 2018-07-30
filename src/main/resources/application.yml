@@ -1,0 +1,24 @@
+server: 
+  port: 8082
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ 
+    registerWithEureka: true
+    fetchRegistry: false
+spring:
+  cloud: 
+    config: 
+      server: 
+        git: 
+          uri: https://github.com/wei9812/bbbb.git
+  application:
+    name: user
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_boot
+    username: root
+    password: ps123456
+    driver-class-name: com.mysql.jdbc.Driver
+  
+    
+    

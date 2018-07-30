@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>员工信息查询</title>
+<link rel="stylesheet" href="../static/css/layui.css" media="all">
+</head>
+<body>
+
+	<form class="layui-form" action="">
+		<div class="layui-form-item">
+			<div class="layui-inline">
+				<label class="layui-form-label">输入框</label>
+				<div class="layui-input-block">
+					<input type="text" name="userName" required lay-verify="required"
+						placeholder="请输入标题" autocomplete="off" class="layui-input"
+						style="width: 300px;">
+				</div>
+			</div>
+
+			<div class="layui-inline">
+				<button class="layui-icon layui-icon-search layui-btn" lay-submit
+					lay-filter="formDemo">立即提交</button>
+			</div>
+			<div class="layui-inline">
+				<a href="javascript:ajarp();"
+					class="layui-btn layui-icon layui-icon-add-1">增加</a>
+			</div>
+
+			<div class="layui-inline">
+				<a href="javascript:deleteUser();"
+					class="layui-btn layui-icon layui-icon-delete">删除</a>
+			</div>
+
+		</div>
+	</form>
+
+	<table id="demo" lay-filter="test"></table>
+	
+	<script type="text/html" id="barDemo">
+  		<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+	</script>
+	
+	<script src="../static/layui.js"></script>
+	<script src="../static/jquery-3.3.1.min.js"></script>
+
+	<script>
+		
+	//新增用户
+	function ajarp() {
+		openDiv = layer.open({
+			title : '新增用户',
+			type : 2,
+			content : 'add.html',
+			area : [ '800px', '500px' ]
+		});
+	};
+			
+	//点击删除
+	function deleteUser() {		
+		var table = layui.table;
+		var checkStatus = table.checkStatus('demo'); //test即为基础参数id对应的值
+		if (checkStatus.data.length == 0) {
+			var layer = layui.layer;
+			layer.msg("请选择要删除的行");
+		}
+		var str = "";
+		for (var i = 0; i < checkStatus.data.length; i++) {
+			var id = checkStatus.data[i].id
+			str += id + ",";
+		}
+		str = str.substring(0, str.length - 1);
+		$.ajax({
+			type : 'post',
+			url : '/deleteUser',
+			data : {
+				"deleteIds" : str,
+				"_method" : 'delete'
+			},
+			dataType : 'json',
+			success : function(e) {
+				if (e.code == 1) {
+					layui.use('layer', function() {
+						var layer = layui.layer;
+						layer.msg('删除成功');
+					});
+					currentTables.reload({});
+				} else {
+					parent.layui.use('layer', function() {
+						var layer = layui.layer;
+						layer.msg('删除失败');
+					})
+				}
+			}
+		})
+	};
+		
+	layui.use('form', function() {
+		var form = layui.form;
+		//监听提交
+		form.on('submit(formDemo)', function(data) {
+			currentTables.reload({
+				where : data.field
+			});
+			return false;
+		});
+	});
+	
+	layui.use('table', function() {
+		var table = layui.table;
+		//监听提交
+		table.on('tool(forc)', function(data) {
+			console.log(data)
+			return false;
+		});
+	});
+
+	layui.use('table', function() {
+		var table = layui.table;
+
+		currentTables = table.render({
+			elem : '#demo',
+			height : 475,
+			url : '/query',
+			page : true, //分页
+			cols : [ [   //表头
+			{
+				field : 'LineNumber',
+				title : '行号',
+				width : '3%',
+				type : 'checkbox',
+				sort : true
+			}, {
+				field : 'id',
+				title : 'ID',
+				width : '20%',
+				sort : true
+			}, {
+				field : 'name',
+				title : '用户名',
+				width : '20%'
+			}, {
+				field : 'sex',
+				title : '性别',
+				width : '20%',
+			}, {
+				field : 'age',
+				title : '年龄',
+				width : '20%'
+			}, {fixed: 'right', 
+				width: 165, 
+				align:'center', 
+				toolbar: '#barDemo'
+			}
+			] ]
+		});
+		
+		//监听工具条
+		table.on('tool(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+		  data = obj.data,//获得当前行数据
+		  layEvent = obj.event; //获得 lay-event 对应的值
+		  if(layEvent === 'edit'){
+			  openDivA = layer.open({
+					title : '修改用户信息',
+					type : 2,
+					content : 'update.html',
+					area : [ '800px', '500px' ]
+				});
+		  }
+		});
+		
+		table.on('edit(test)', function(obj){ //注：edit是固定事件名，test是table原始容器的属性 lay-filter="对应的值"
+			  console.log(obj.value); //得到修改后的值
+			  console.log(obj.field); //当前编辑的字段名
+			  console.log(obj.data); //所在行的所有相关数据 
+		});
+	});
+	
+	
+	
+	</script>
+</body>
+</html>

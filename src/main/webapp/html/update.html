@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="../static/css/layui.css" media="all">
+<script src="../static/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<form class="layui-form" lay-filter="formData"> 
+  <div class="layui-form-item">
+    <label class="layui-form-label">用户名</label>
+    <div class="layui-input-block">
+      <input type="text" name="name" lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <label class="layui-form-label">年龄</label>
+    <div class="layui-input-block">
+      <input type="text" name="age" lay-verify="number"  placeholder="请输入年龄" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <label class="layui-form-label">性别</label>
+    <div class="layui-input-block">
+      <input type="radio" name="sex" value="男" title="男">
+      <input type="radio" name="sex" value="女" title="女" checked>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+  </div>
+</form>
+<script src="../static/layui.js"></script>
+<script>
+
+	function closeThis(){
+		//关闭层
+		var ob= parent.openDivA;
+		//重新加载数据
+	 	parent.layui.use('layer',function(){
+			 var layer = parent.layui.layer;
+			 layer.close(ob);
+		})
+	}
+	
+	layui.use('form', function(){
+	  	var form = layui.form;	  
+	  	var par=parent.data;
+	  
+	  	var bean={
+		  	name : par.name,
+		  	sex  : par.sex,
+		  	age  : par.age
+	  	}
+	 	 form.val("formData",bean);
+	 
+		//监听提交
+	  	form.on('submit(formDemo)', function(data){
+		     var obj = {
+		    	 id   : par.id,
+		    	 name : data.field.name,
+		    	 age  : data.field.age,
+		    	 sex  : data.field.sex
+		     }
+		     
+		     $.ajax({
+				type : "put",
+				url : "/updateUser",
+				data : obj,
+				dataType:"json",
+				success : function(e) {
+					if(e.code == 1){
+						alert('修改成功');
+						closeThis();
+						parent.currentTables.reload({});
+					} else {
+						alert('修改失败');
+						alert(e.msg);
+					}
+				}
+			})
+			    return false;
+		});
+	
+	});
+	
+	
+	
+</script>
+
+</body>
+</html>
